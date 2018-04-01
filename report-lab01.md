@@ -65,6 +65,11 @@
         puts("early console in setup code\n");
 
 故从此行之后可利用puts即时向控制台输出信息进行调试。
+修改内核代码重新编译，在main函数中输出“I'm in /arch/x86/boot/main.c” 作为测试，结果如下：
+
+![](tryPuts.png)
+
+看到在bios将控制权交给内核后，输出了如上字符串。
 
 ### 关键事件1
 
@@ -73,6 +78,7 @@ arch/x86/boot/main.c 中 main 函数开始运行即为第一个关键事件。
 
 * 1 console_init() 控制台初始化，这也是我们能够进行调试的基础
 * 2 keyboard_init() 键盘初始化
+* 3 set_video() 视频模式初始化，开始支持VGA等接口显示
 
 即内核有了基本的输入输出能力。
 
@@ -86,7 +92,31 @@ arch/x86/boot/main.c 中 main 函数开始运行即为第一个关键事件。
 
 在main函数的最后，它启动了我们下一步要跟踪的关键事件go_to_protected_mode()
 
+为了查看在函数main中cpu的状态，我在console_init之后加上while(1),强行暂停了内核的启动。
+然后用gdb查看寄存器状态，寄存器状态如下：
+
+![](main.png)
+
+rcx中应为数据段描述符索引，这是实模式中代码放置的，在切换到保护模式的过程中起到作用[2]。
+
 ### 关键事件2
+
+如上所述，关键事件2为go_to_protected_mode()的调用，该函数在pm.c中定义。
+阅读代码arch/x86/boot/pm.c，go_to_protected_mode()函数在进行各种准备工作后（包括堆中断向量表和实模式的一些操作，以及设置中断描述符和全局描述符[2]，这些操作大部分是用汇编指令完成的，所以不是非常明白），函数调用了
+
+    protected_mode_jump(boot_params.hdr.code32_start,
+			    (u32)&boot_params + (ds() << 4));
+
+正式进入保护模式。
+与main函数中一样，我在上面一行调用之前加上了while(1)，重新编译内核，来查看虚拟机的状态。
+寄存器状态如下：
+
+![](pm.png)
+
+可以看到，eax和edx储存了该函数的两个参数[2]。
+
+### 关键事件3
+
 
 
 
