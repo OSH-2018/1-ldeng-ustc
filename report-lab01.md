@@ -63,7 +63,7 @@
 
     if (cmdline_find_option_bool("debug"))
         puts("early console in setup code\n");
-        
+
 故从此行之后可利用puts即时向控制台输出信息进行调试。
 
 ### 关键事件1
@@ -71,8 +71,23 @@
 arch/x86/boot/main.c 中 main 函数开始运行即为第一个关键事件。
 /boot/main.c 是系统运行中第一个运行的C语言函数。各种设备的初始化基本都是在此执行的，包括
 
-* 1 控制台初始化，这也是我们能够进行调试的基础
-* 2 
+* 1 console_init() 控制台初始化，这也是我们能够进行调试的基础
+* 2 keyboard_init() 键盘初始化
+
+即内核有了基本的输入输出能力。
+
+同时，该函数还进行了很多操作，包括
+* 1 copy_boot_params() 拷贝启动参数
+* 2 init_heap() 全局堆和堆栈的初始化
+* 3 validate_cpu() 检测cpu
+* 4 set_bios_mode() 不太明白，按照注释，告诉bios我们希望cpu以什么模式运行
+* 5 detect_memory() 检测内存分布
+* ……
+
+在main函数的最后，它启动了我们下一步要跟踪的关键事件go_to_protected_mode()
+
+### 关键事件2
+
 
 
 ## 参考文献
