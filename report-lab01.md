@@ -59,7 +59,22 @@
 
     early console in setup code
 
-这是
+
+
+
+    if (cmdline_find_option_bool("debug"))
+	 	     puts("early console in setup code\n");
+        
+故从此行之后可利用puts即时向控制台输出信息进行调试。
+
+### 关键事件1
+
+arch/x86/boot/main.c 中 main 函数开始运行即为第一个关键事件。
+/boot/main.c 是系统运行中第一个运行的C语言函数。各种设备的初始化基本都是在此执行的，包括
+
+* 1 控制台初始化，这也是我们能够进行调试的基础
+* 2 
+
 
 ## 参考文献
 
