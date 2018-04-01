@@ -53,6 +53,7 @@
 
     list
     info source
+
 发现gdb在开始调试时已经进入 linux/init/header_64.S ，而符号表中能找到的运行最早的符号应为 start_kernel， 这给start_kernel之前的调试带来了困难。
 
 ## 参考文献
