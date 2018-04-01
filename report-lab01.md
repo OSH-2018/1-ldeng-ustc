@@ -54,7 +54,12 @@
     list
     info source
 
-发现gdb在开始调试时已经进入 linux/init/header_64.S ，而符号表中能找到的运行最早的符号应为 start_kernel， 这给start_kernel之前的调试带来了困难。
+发现gdb在开始调试时已经进入 linux/init/head_64.S ，而符号表中能找到的运行最早的符号应为 start_kernel， 这给start_kernel之前的调试带来了困难。
+考虑到除去引导部分，内核启动时应从linux/arch/x86/boot/head.S 开始，而第一个C语言代码在 arch/x86/boot/main.c 阅读代码，在拷贝参数后，早期的控制台已经启动，而通过gdb在start_kernel处设置断点，观察控制台输出，有
+
+    early console in setup code
+
+这是
 
 ## 参考文献
 
