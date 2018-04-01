@@ -51,19 +51,18 @@
 
 在gdb中运行
 
-    list
-    info source
-
+    list
+    info source
+    
 发现gdb在开始调试时已经进入 linux/init/head_64.S ，而符号表中能找到的运行最早的符号应为 start_kernel， 这给start_kernel之前的调试带来了困难。
 考虑到除去引导部分，内核启动时应从linux/arch/x86/boot/head.S 开始，而第一个C语言代码在 arch/x86/boot/main.c 阅读代码，在拷贝参数后，早期的控制台已经启动，而通过gdb在start_kernel处设置断点，观察控制台输出，有
 
     early console in setup code
 
-
-
+这是main.c中两行代码的结果，在qemu启动中，我们给命令行加入了debug参数，早期控制台初始化完毕后输出了信息。
 
     if (cmdline_find_option_bool("debug"))
-	 	     puts("early console in setup code\n");
+        puts("early console in setup code\n");
         
 故从此行之后可利用puts即时向控制台输出信息进行调试。
 
