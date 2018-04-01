@@ -119,11 +119,43 @@ rcx中应为数据段描述符索引，这是实模式中代码放置的，在�
 
 切换到保护模式后，cpu进入了32位模式。然后过渡到长模式，即64位模式。之后进行内核解压缩。
 这一部分代码大部分是用汇编语言写的，我能力有限，就暂且跳过了。
-那么系统就运行到了我们开始使用gdb时，info source所指向的位置。即架构无关的内核代码的开始init/head_64.S。该文件也是一个汇编文件，在多次回到arch/x86/kernel/head64.c等地方执行后，最后head64.c调用了start_kernel函数。
+那么系统就运行到了我们开始使用gdb时，info source所指向的位置。即架构无关的内核代码的开始init/head_64.S。该文件也是一个汇编文件，在多次回到arch/x86/kernel/head64.c等地方执行后，最后head_64.S调用了start_kernel函数。
 这个地方gdb已经可以进行断点调试了，我们的跟踪变得轻松起来。这也是我所跟踪到的第三个关键事件。
 
+先来看看调用栈
 
+![](backtrace.png)
 
+start_kernel是由head_64.S调用的，与前述一致。
+
+看看线程情况
+
+![](thread.png)
+
+之前qemu设置了两个cpu，现在cpu1处于halt状态，只有cpu0运行着start_kernel，也符合预期。
+
+利用next和step进行单步调试，start_kernel运行了很多函数。一个值得注意的问题是，运行完pr_notice函数后，控制台似乎并没有出现显示。
+利用
+
+    print linux_banner
+
+查看变量
+
+    $2 = 0xffffffff81e00080 <linux_banner> "Linux version 4.15.14 (ldeng@ldeng-PC) (gcc version 5.4.0 20160609 (Ubuntu 5.4.0-6ubuntu1~16.04.9)) #6 SMP Sun Apr 1 21:57:13 CST 2018\n"
+    
+变量的值并没有问题。发现几行之后要运行
+
+     console_init()
+
+在这个函数设置断点，并运行continue。发现在这个函数运行之前都没有信息输出。
+而在该断点finish，运行完此函数，qemu屏幕上突然显示出许多信息。可见该函数初始化了控制台，之前缓冲区中的信息都写到了屏幕上。
+
+start_kernel的最后，进入了rest_init进行其他设置。
+rest_init也在main.c里，其启动了两个新的进程：kernel_init和kthreadd，他们分别为系统进程和用户进程的祖先。
+
+## 结语
+
+本次实验时间比较紧张，做得比较仓促，所以很多地方没有仔细跟踪，只是大致了解了启动过程的大概。希望以后有机会补全。
 
 
 
