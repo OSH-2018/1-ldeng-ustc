@@ -40,6 +40,22 @@
 
 其中 console 和 earlyprink 参数配置了内核启动中早期过程中的串口输出，debug参数会使内核启动过程中额外输出一些信息
 
+### 尝试开始调试
+
+运行 ./start.sh 启动qemu
+在新的终端中运行
+
+    gdb vmlinux
+    
+启动gdb并导入 vmlinux中的符号表
+
+在gdb中运行
+
+    list
+    info source
+发现gdb在开始调试时已经进入 linux/init/header_64.S ，而符号表中能找到的运行最早的符号应为 start_kernel， 这给start_kernel之前的调试带来了困难。
+
 ## 参考文献
 
 [1]  http://www.cnblogs.com/chineseboy/p/4216521.html 
+[2]  https://www.gitbook.com/book/xinqiu/linux-insides-cn
