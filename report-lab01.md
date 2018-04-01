@@ -14,10 +14,32 @@
 
 ## 实验方法及过程
 
-参考了 http://www.cnblogs.com/chineseboy/p/4216521.html 的内容。
+大致按照了参考文献[1]的内容。
 
 ### 编译内核
-使用命令
+
+使用命令编译内核
+
+    make menuconfig
+    <save>
+    make bzImage
+
+使用dracut生成initramfs文件
+
+    dracut init.img 4.15.14
+    chmod 666 init.im
 
 ### qemu与gdb的配置
+    
+按参考文献[1]中方法修改gdb源码并编译，解决 g_packet 过长的问题
 
+新建start.sh用作启动，代码如下
+
+    #!/bin/bash
+    qemu-system-x86_64 -kernel ./bzImage -initrd ./init.img -smp 2 -gdb tcp::1234 -m 1024 -append "console=ttyS0 earlyprintk=ttyS0,115200 nokaslr debug" -S
+
+其中 console 和 earlyprink 参数配置了内核启动中早期过程中的串口输出，debug参数会使内核启动过程中额外输出一些信息
+
+## 参考文献
+
+[1]  http://www.cnblogs.com/chineseboy/p/4216521.html 
